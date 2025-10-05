@@ -1,4 +1,4 @@
-package main.java.com.monitoring.common;
+package com.monitoring.common;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -8,13 +8,13 @@ public class Metric implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int agentId;
-    private String serviceName;
+    private Service service;
     private double value;
     private MetricType type;
     private LocalDateTime timestamp;
 
     public enum MetricType {
-        RPS, CPU_USAGE, RESPONSE_TIME,
+        CPU_USAGE, RESPONSE_TIME,
         MEMORY_USAGE, DISK_USAGE
     }
 
@@ -22,10 +22,10 @@ public class Metric implements Serializable {
         this.timestamp = LocalDateTime.now();
     }
 
-    public Metric(int agentId, String serviceName, double value, MetricType type) {
+    public Metric(int agentId, Service service, double value, MetricType type) {
         this();
         this.agentId = agentId;
-        this.serviceName = serviceName;
+        this.service = service;
         this.value = value;
         this.type = type;
     }
@@ -38,12 +38,12 @@ public class Metric implements Serializable {
         this.agentId = agentId;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public Service getServiceName() {
+        return service;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setServiceName(Service service) {
+        this.service = service;
     }
 
     public double getValue() {
@@ -71,21 +71,21 @@ public class Metric implements Serializable {
     }
 
     @Override
-    public boolean equal(Object o) {
-        if (this == 0) return true;
+    public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         Metric metric = (Metric) o;
         return Double.compare(value, metric.getValue()) == 0 &&
         agentId == metric.getAgentId() &&
-        serviceName.equals(metric.getServiceName()) && 
+        service.equals(metric.getServiceName()) && 
         type.compareTo(metric.getType()) == 0 &&
         timestamp.equals(metric.getTimestamp());   
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agentId, serviceName, value, type, timestamp);
+        return Objects.hash(agentId, service, value, type, timestamp);
     }
 
 }
