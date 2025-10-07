@@ -72,15 +72,17 @@ public class Metric implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Metric metric = (Metric) o;
         return Double.compare(value, metric.getValue()) == 0 &&
-        agentId == metric.getAgentId() &&
-        service.equals(metric.getServiceName()) && 
-        type.compareTo(metric.getType()) == 0 &&
-        timestamp.equals(metric.getTimestamp());   
+                agentId == metric.getAgentId() &&
+                service.equals(metric.getServiceName()) &&
+                type.compareTo(metric.getType()) == 0 &&
+                timestamp.equals(metric.getTimestamp());
     }
 
     @Override
@@ -88,4 +90,9 @@ public class Metric implements Serializable {
         return Objects.hash(agentId, service, value, type, timestamp);
     }
 
+    @Override
+    public String toString() {
+        return "Metric from agent " + agentId + " , service " + service + " : " + type.name() + " " + value + " "
+                + timestamp;
+    }
 }

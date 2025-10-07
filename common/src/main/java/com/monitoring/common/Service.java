@@ -1,8 +1,10 @@
 package com.monitoring.common;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Service {
+public class Service implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String url;
     private int port;
 

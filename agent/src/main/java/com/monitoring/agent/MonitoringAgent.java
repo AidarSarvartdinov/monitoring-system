@@ -36,6 +36,7 @@ public class MonitoringAgent {
     }
 
     public void start() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
         if (!this.running.compareAndSet(false, true)) {
             System.out.println("Agent " + agentId + " already running");
             return;
@@ -68,8 +69,9 @@ public class MonitoringAgent {
                     out.writeObject(new AgentMessage(agentId, "DISCONNECTED"));
                     out.flush();
                 }
+                System.out.println("Agent " + agentId + " sent graceful disconnect");
             } catch (IOException e) {
-                System.err.println("Faild to send disconnect message: " + e.getMessage());
+                System.out.println("Agent " + agentId + " connection already closed");
             }
         }
 

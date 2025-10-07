@@ -1,6 +1,9 @@
 package com.monitoring.common;
 
-public class AgentMessage {
+import java.io.Serializable;
+
+public class AgentMessage implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int agentId;
     private String message;
 
@@ -17,4 +20,8 @@ public class AgentMessage {
         return message;
     }
 
+    @Override
+    public String toString() {
+        return "Agent " + agentId + ": " + message;
+    }
 }
