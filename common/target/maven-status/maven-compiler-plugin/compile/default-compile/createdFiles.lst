@@ -1,0 +1,4 @@
+com\monitoring\common\AgentMessage.class
+com\monitoring\common\Metric.class
+com\monitoring\common\Service.class
+com\monitoring\common\Metric$MetricType.class

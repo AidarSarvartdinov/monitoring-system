@@ -1,0 +1,2 @@
+com\monitoring\server\ServerApplication.class
+com\monitoring\server\socket\MonitoringServer.class

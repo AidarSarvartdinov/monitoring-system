@@ -10,21 +10,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.stereotype.Component;
+
 import com.monitoring.common.AgentMessage;
 import com.monitoring.common.Metric;
+import com.monitoring.server.web.service.MetricService;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
+@Component
 public class MonitoringServer {
-    private int port;
+    private int port = 8081;
     private volatile boolean running;
     private ServerSocket server;
     private ExecutorService executor;
+    private MetricService metricService;
 
-    public MonitoringServer(int port) {
-        this.port = port;
+    public MonitoringServer(MetricService metricService) {
         this.executor = Executors.newCachedThreadPool();
+        this.metricService = metricService;
     }
 
+    @PostConstruct
     public void start() {
+        new Thread(this::runServer).start();
+    }
+
+    public void runServer() {
         try {
             server = new ServerSocket(port);
             this.running = true;
@@ -53,6 +66,7 @@ public class MonitoringServer {
                                 } else {
                                     Metric metric = (Metric) input;
                                     System.out.println(metric);
+                                    metricService.addMetric(metric);
 
                                 }
                             } catch (EOFException e) {
@@ -85,9 +99,10 @@ public class MonitoringServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+
+    @PreDestroy
     public void stop() {
         System.out.println("Stopping Monitoring Server");
 
@@ -116,5 +131,7 @@ public class MonitoringServer {
         }
 
     }
+
+    
 
 }
