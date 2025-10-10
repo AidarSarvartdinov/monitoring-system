@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Monitoring Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .metric { 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            margin: 5px; 
+            border-radius: 5px;
+            background: #f9f9f9;
+            transition: background-color 0.3s;
+        }
+        .metric.updated {
+            background-color: #ffffcc;
+        }
+        .service-section {
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            padding: 10px;
+        }
+        .service-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            background: #4CAF50;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Monitoring Dashboard</h1>
+    
+    <div>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+        Status: <span id="status">Disconnected</span> |
+        Metrics: <span id="metrics-count">0</span>
+    </div>
+
+    <div id="metrics-container"></div>
+
+    <script>
+        let stompClient = null;
+        const metricElements = new Map();
+        const serviceContainers = new Map();
+        
+        function connect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function(frame) {
+                document.getElementById('status').textContent = 'Connected';
+                document.getElementById('status').style.color = 'green';
+                
+                stompClient.subscribe('/metrics', function(message) {
+                    const metric = JSON.parse(message.body);
+                    updateOrCreateMetric(metric);
+                    updateMetricsCount();
+                });
+            });
+        }
+        
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+            document.getElementById('status').textContent = 'Disconnected';
+            document.getElementById('status').style.color = 'red';
+        }
+        
+        function updateOrCreateMetric(metric) {
+            // Создаем уникальный ключ для метрики
+            const metricKey = `${metric.url}:${metric.port}:${metric.type}`;
+            
+            if (metricElements.has(metricKey)) {
+                // Обновляем существующую метрику
+                updateExistingMetric(metricKey, metric);
+            } else {
+                // Создаем новую метрику
+                createNewMetric(metricKey, metric);
+            }
+        }
+        
+        function createNewMetric(metricKey, metric) {
+            const metricsContainer = document.getElementById('metrics-container');
+            
+            // Создаем или получаем контейнер для сервиса
+            const serviceKey = `${metric.url}:${metric.port}`;
+            let serviceContainer = serviceContainers.get(serviceKey);
+            
+            if (!serviceContainer) {
+                serviceContainer = document.createElement('div');
+                serviceContainer.className = 'service-section';
+                
+                // Создаем безопасный ID для сервиса (без точек и двоеточий)
+                const safeServiceId = serviceKey.replace(/[.:]/g, '-');
+                
+                serviceContainer.innerHTML = `
+                    <div class="service-name">${metric.url}:${metric.port}</div>
+                    <div class="service-metrics" id="service-${safeServiceId}"></div>
+                `;
+                metricsContainer.appendChild(serviceContainer);
+                serviceContainers.set(serviceKey, serviceContainer);
+            }
+            
+            // Создаем безопасный ID для сервиса и метрики
+            const safeServiceId = serviceKey.replace(/[.:]/g, '-');
+            const safeMetricId = metricKey.replace(/[.:]/g, '-');
+            
+            const serviceMetrics = document.getElementById(`service-${safeServiceId}`);
+            
+            // Создаем элемент метрики
+            const metricElement = document.createElement('div');
+            metricElement.className = 'metric';
+            metricElement.id = `metric-${safeMetricId}`;
+            metricElement.innerHTML = `
+                <div>
+                    <span class="metric-type">${metric.type}: </span>
+                    <span class="metric-value">${metric.value.toFixed(2)}</span>
+                </div>
+                <div class="timestamp">Last updated: ${metric.timestamp}</div>
+            `;
+            
+            serviceMetrics.appendChild(metricElement);
+            metricElements.set(metricKey, metricElement);
+        }
+        
+        function updateExistingMetric(metricKey, metric) {
+            const metricElement = metricElements.get(metricKey);
+            
+            if (!metricElement) return;
+            
+            // Обновляем значения
+            const valueElement = metricElement.querySelector('.metric-value');
+            const timestampElement = metricElement.querySelector('.timestamp');
+            
+            if (valueElement) {
+                valueElement.textContent = metric.value.toFixed(2);
+            }
+            if (timestampElement) {
+                timestampElement.textContent = `Last updated: ${metric.timestamp}`;
+            }
+            
+            // Подсвечиваем обновление
+            metricElement.classList.add('updated');
+            setTimeout(() => {
+                metricElement.classList.remove('updated');
+            }, 1000);
+        }
+        
+        function updateMetricsCount() {
+            document.getElementById('metrics-count').textContent = metricElements.size;
+        }
+        
+        // Автоподключение при загрузке страницы
+        window.onload = connect;
+    </script>
+</body>
+</html>
