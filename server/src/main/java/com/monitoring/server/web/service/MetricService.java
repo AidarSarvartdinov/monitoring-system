@@ -8,24 +8,29 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.monitoring.common.Metric;
+import com.monitoring.server.entity.Metrics;
+import com.monitoring.server.repository.MetricsRepository;
 import com.monitoring.server.web.dto.MetricDto;
 
 @Service
 public class MetricService {
-    private List<Metric> metrics = new CopyOnWriteArrayList<>();
+    private final List<Metric> metrics = new CopyOnWriteArrayList<>();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     private final SimpMessagingTemplate messagingTemplate;
+    private final MetricsRepository metricsRepository;
 
-    public MetricService(SimpMessagingTemplate messagingTemplate) {
+    public MetricService(SimpMessagingTemplate messagingTemplate, MetricsRepository metricsRepository) {
         this.messagingTemplate = messagingTemplate;
+        this.metricsRepository = metricsRepository;
     }
 
     public void addMetric(Metric metric) {
-        metrics.add(metric);
+        // metrics.add(metric);
         sendMetric(metric);
-        if (metrics.size() >= 1000) {
-            metrics.remove(0);
-        }
+        metricsRepository.save(new Metrics(metric));
+        // if (metrics.size() >= 1000) {
+        //     metrics.remove(0);
+        // }
     }
 
     public void sendMetric(Metric metric) {
