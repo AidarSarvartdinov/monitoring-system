@@ -1,6 +1,7 @@
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\socket\MonitoringServer.java
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\web\controller\MetricController.java
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\entity\Metrics.java
+C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\scheduler\DataCleanupScheduler.java
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\repository\MetricsRepository.java
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\web\config\WebSocketConfig.java
 C:\Projects\javaProjects\Monitoring\monitoring-system\server\src\main\java\com\monitoring\server\web\service\MetricService.java
